@@ -1,61 +1,94 @@
+const temas = {
+    colores: ['azul', 'amarillo', 'rojo', 'verde', 'turquesa', 'rosa', 'morado', 'malva', 'blanco', 'negro', 'marron', 'naranja', 'violeta', 'lila', 'beige'],
+    paises: [ 'Albania', 'Alemania', 'Andorra', 'Austria', 'Bielorrusia', 'Bélgica', 'Bosnia y Herzegovina', 'Bulgaria', 'Chipre', 'Croacia', 'Dinamarca', 'Eslovaquia', 'Eslovenia',
+        'España', 'Estonia', 'Finlandia', 'Francia', 'Grecia', 'Hungría', 'Irlanda', 'Islandia', 'Italia', 'Kosovo', 'Letonia', 'Liechtenstein', 'Lituania',
+        'Luxemburgo', 'Macedonia del Norte', 'Malta', 'Moldavia', 'Mónaco', 'Montenegro', 'Noruega', 'Países Bajos', 'Polonia', 'Portugal', 'Reino Unido', 'República Checa', 'Rumania', 'Rusia', 'San Marino', 'Serbia', 'Suecia', 'Suiza', 'Ucrania', 'Vaticano'],
+    tecnologia: ['programacion', 'computadora', 'internet', 'javascript', 'desarrollo', 'software', 'tecnologia', 'basededatos', 'frontend', 'backend', 'servidor', 'cliente', 'web', 'aplicacion', 'codigo']
+};
+
 window.onload = function() {
-    // Array de palabras disponibles para el juego
-    const palabras = [
-        "programacion", "computadora", "internet", "javascript", "desarrollo",
-        "software", "tecnologia", "basededatos", "frontend", "backend",
-        "servidor", "cliente", "web", "aplicacion", "codigo"
-    ];
+    let palabraSeleccionada = '';
+    let palabraOculta = [];
+    let intentos = 0;
+    const maxIntentos = 10;
+    const botonIniciar = document.getElementById("iniciarJuego");
+    const palabraOcultaElement = document.getElementById("palabraOculta");
+    const tecladoVisual = document.getElementById("tecladoVisual");
+    const mensajeElement = document.getElementById("mensaje");
+    const temaSelect = document.getElementById("tema");
 
-    let palabraSeleccionada = ''; // Variable para almacenar la palabra seleccionada aleatoriamente
-    let palabraOculta = []; // Array para almacenar la representación oculta de la palabra
-    let intentos = 0; // Contador de intentos fallidos
-    const maxIntentos = 10; // Número máximo de intentos permitidos
-    const botonIniciar = document.getElementById("iniciarJuego"); // Botón para iniciar el juego
-    const palabraOcultaElement = document.getElementById("palabraOculta"); // Elemento donde se muestra la palabra oculta
-    const letraInput = document.getElementById("letra"); // Campo de entrada para la letra adivinada por el usuario
-    const botonAdivinar = document.getElementById("adivinarLetra"); // Botón para enviar la letra adivinada
-    const mensajeElement = document.getElementById("mensaje"); // Elemento donde se muestran los mensajes al usuario
-
-    // Evento para iniciar el juego
     botonIniciar.addEventListener("click", function() {
-        // Selecciona una palabra aleatoria del array
+        const temaSeleccionado = temaSelect.value;
+        const palabras = temas[temaSeleccionado];
         const indiceAleatorio = Math.floor(Math.random() * palabras.length);
-        palabraSeleccionada = palabras[indiceAleatorio];
-        // Inicializa el array de la palabra oculta con guiones bajos
+        palabraSeleccionada = palabras[indiceAleatorio].toLowerCase();
         palabraOculta = Array(palabraSeleccionada.length).fill("_");
-        // Muestra la palabra oculta en el elemento correspondiente
         palabraOcultaElement.textContent = palabraOculta.join(" ");
-        mensajeElement.textContent = ""; // Limpia cualquier mensaje previo
-        intentos = 0; // Reinicia el contador de intentos
+        mensajeElement.textContent = "";
+        intentos = 0;
+        tecladoVisual.innerHTML = '';
+        document.getElementById("entradaLetra").style.display = 'block';
+        crearTecladoVisual();
     });
 
-    // Evento para adivinar una letra
-    botonAdivinar.addEventListener("click", function() {
-        const letra = letraInput.value.toLowerCase(); // Obtiene la letra ingresada por el usuario y la convierte a minúscula
-        if (letra && letra.length === 1) { // Verifica que se haya ingresado una letra válida
-            let letraEncontrada = false; // Variable para verificar si la letra fue encontrada en la palabra
-            // Recorre la palabra seleccionada para verificar si contiene la letra ingresada
+    function crearTecladoVisual() {
+        const letras = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        letras.forEach(letra => {
+            const boton = document.createElement('button');
+            boton.textContent = letra.toUpperCase();
+            boton.value = letra;
+            boton.classList.add('teclado-boton');
+            boton.addEventListener('click', function() {
+                adivinarLetra(letra);
+                boton.disabled = true;
+            });
+            tecladoVisual.appendChild(boton);
+        });
+
+        // Botón especial para el espacio
+        const espacioBoton = document.createElement('button');
+        espacioBoton.textContent = "ESPACIO";
+        espacioBoton.value = " ";
+        espacioBoton.classList.add('teclado-boton', 'espacio');
+        espacioBoton.addEventListener('click', function() {
+            adivinarLetra(" ");
+            espacioBoton.disabled = true;
+        });
+        tecladoVisual.appendChild(espacioBoton);
+    }
+
+    function adivinarLetra(letra) {
+        if (letra === ' ') {
+            // Aquí puedes manejar el espacio según tus necesidades
+            // Por ejemplo, puedes omitirlo o tratarlo como una letra válida
+        } else {
+            let letraEncontrada = false;
             for (let i = 0; i < palabraSeleccionada.length; i++) {
                 if (palabraSeleccionada[i] === letra) {
-                    palabraOculta[i] = letra; // Reemplaza el guión bajo con la letra correspondiente
-                    letraEncontrada = true; // Indica que la letra fue encontrada
+                    palabraOculta[i] = letra;
+                    letraEncontrada = true;
                 }
             }
-            // Actualiza la visualización de la palabra oculta
             palabraOcultaElement.textContent = palabraOculta.join(" ");
-            letraInput.value = ''; // Limpia el campo de entrada
-            if (!letraEncontrada) { // Si la letra no fue encontrada
-                mensajeElement.textContent = "Letra no encontrada."; // Muestra mensaje de letra no encontrada
-                intentos++; // Incrementa el contador de intentos fallidos
-                if (intentos >= maxIntentos) { // Si se alcanzó el número máximo de intentos
-                    mensajeElement.textContent = "¡Has perdido! La palabra era: " + palabraSeleccionada; // Muestra mensaje de pérdida
+            if (!letraEncontrada) {
+                mensajeElement.textContent = "Letra no encontrada.";
+                intentos++;
+                if (intentos >= maxIntentos) {
+                    cambiarTextoMarquesina("¡Has perdido! La palabra era: " + palabraSeleccionada);
+                    document.getElementById("entradaLetra").style.display = 'none';
                 }
             } else {
-                mensajeElement.textContent = ""; // Limpia el mensaje si la letra fue encontrada
+                mensajeElement.textContent = "";
             }
-            if (!palabraOculta.includes("_")) { // Si no quedan guiones bajos en la palabra oculta
-                mensajeElement.textContent = "¡Felicidades! Has adivinado la palabra."; // Muestra mensaje de victoria
+            if (!palabraOculta.includes("_")) {
+                cambiarTextoMarquesina("¡Felicidades! Has adivinado la palabra.");
+                document.getElementById("entradaLetra").style.display = 'none';
             }
         }
-    });
+    }
+
+    function cambiarTextoMarquesina(nuevoTexto) {
+        const textoMarquesina = document.getElementById("mensaje");
+        textoMarquesina.textContent = nuevoTexto;
+    }
 }
